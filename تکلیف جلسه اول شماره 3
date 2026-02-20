@@ -1,0 +1,4 @@
+poetry init
+poetry init --no-interaction
+poetry new my_project 
+poetry add requests
