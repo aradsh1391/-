@@ -1,0 +1,48 @@
+import csv
+import sys
+from typing import Generator
+
+def read_csv_generator(file_path: str) -> Generator[float, None, None]:
+    """
+    Generator that reads a CSV file line-by-line and yields numeric values.
+    Assumes the CSV has one numeric value per row or the value is in the first column.
+    """
+    try:
+        with open(file_path, mode='r', newline='', encoding='utf-8') as csvfile:
+            reader = csv.reader(csvfile)
+            for row in reader:
+                if not row:
+                    continue  # Skip empty lines
+                try:
+                    yield float(row[0])  # Convert first column to float
+                except ValueError:
+                    # Skip rows where conversion fails (e.g., header or invalid data)
+                    continue
+    except FileNotFoundError:
+        print(f"Error: File '{file_path}' not found.", file=sys.stderr)
+    except Exception as e:
+        print(f"Unexpected error: {e}", file=sys.stderr)
+
+
+def running_average_generator(numbers: Generator[float, None, None]) -> Generator[float, None, None]:
+    """
+    Generator that takes a stream of numbers and yields the running average.
+    """
+    total = 0.0
+    count = 0
+    for num in numbers:
+        count += 1
+        total += num
+        yield total / count  # Running average
+
+
+if __name__ == "__main__":
+    csv_file = "large_data.csv"  # Replace with your CSV file path
+
+    # Create the generator pipeline
+    values_gen = read_csv_generator(csv_file)
+    avg_gen = running_average_generator(values_gen)
+
+    # Print running averages
+    for avg in avg_gen:
+        print(f"Running average: {avg:.2f}")
