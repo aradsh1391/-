@@ -1,0 +1,39 @@
+import psutil
+import os
+import sys
+import time
+
+def memory_usage_mb():
+    """Return current process memory usage in MB."""
+    process = psutil.Process(os.getpid())
+    return process.memory_info().rss / (1024 * 1024)  # RSS in MB
+
+def compare_generator_vs_list(n):
+    """Compare memory usage of generator vs list."""
+    print(f"Initial memory usage: {memory_usage_mb():.2f} MB")
+
+    # Create a generator expression
+    gen = (i for i in range(n))
+    print(f"Generator object size: {sys.getsizeof(gen)} bytes")
+    print(f"Memory after generator creation: {memory_usage_mb():.2f} MB")
+
+    # Create a list
+    lst = [i for i in range(n)]
+    print(f"List object size: {sys.getsizeof(lst)} bytes")
+    print(f"Memory after list creation: {memory_usage_mb():.2f} MB")
+
+    # Prevent unused variable optimization
+    _ = sum(lst) + sum(gen)
+
+if __name__ == "__main__":
+    try:
+        # Adjust n to see bigger differences
+        n = 10_000_00  # 1 million
+        compare_generator_vs_list(n)
+
+        # Keep process alive briefly to observe in system monitor
+        time.sleep(2)
+    except MemoryError:
+        print("MemoryError: Not enough memory for this operation.")
+    except Exception as e:
+        print(f"Error: {e}")
